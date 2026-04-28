@@ -2,11 +2,11 @@
 ## What is Machine Learning
 ## Abstract from wikipedia
 
-![1777338154188](image/README/1777338154188.png)
+![1777338154188](image/1777338154188.png)
 
 ## Aritifical Neural Network
 
-![1777339957607](image/README/1777339957607.png)
+![1777339957607](image/1777339957607.png)
 
 Artificial neural networks (ANNs) are computing systems vaguely inspired by the biological neural networks that constitute animal brains. Such systems "learn" to perform tasks by considering examples, generally without being programmed with any task-specific rules.
 
@@ -23,7 +23,7 @@ Probabilistic reasoning was also employed, especially in automated medical diagn
 
 ## Learning Method
 
-![1777338610522](image/README/1777338610522.png)
+![1777338610522](image/1777338610522.png)
 
 ### Supervised Learning
 
@@ -52,17 +52,17 @@ As it navigates its problem space, the program is provided feedback that's analo
 
 ## Decision Tree
 
-![1777339176146](image/README/1777339176146.png)
+![1777339176146](image/1777339176146.png)
 
 ## Regression Analysis
 
-![1777339207956](image/README/1777339207956.png)
+![1777339207956](image/1777339207956.png)
 
 ## Bayesian Networks
 
-![1777339279451](image/README/1777339279451.png)
+![1777339279451](image/1777339279451.png)
 
 ## Gaussian Process
 
-![1777339242124](image/README/1777339242124.png)
+![1777339242124](image/1777339242124.png)
 
