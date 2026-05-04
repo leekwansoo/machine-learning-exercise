@@ -1,0 +1,13 @@
+.venv/
+.env
+__pycache__/
+*.csv
+*.log
+*.sqlite3
+*.pyc
+pytorch/data/
+pytorch/models/
+machine_learning/data/
+machine_learning/models/
+*.joblib
+*.h5
