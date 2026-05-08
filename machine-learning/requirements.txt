@@ -6,3 +6,12 @@ seaborn
 torch
 torchvision
 joblib
+lightgbm
+xgboost
+catboost
+statsmodels
+imbalanced-learn
+optuna
+mlflow
+pytest
+black
