@@ -1,9 +1,14 @@
 pandas 
+numpy
+scikit-learn
 openpyxl 
 xlrd
 matplotlib 
+seaborn
+torch
+torchvision
+joblib
 reportlab 
 streamlit 
 pyinstaller 
 xlwings
-reportlab
