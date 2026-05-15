@@ -6,3 +6,5 @@ seaborn
 torch
 torchvision
 joblib
+openpyxl
+xlrd
