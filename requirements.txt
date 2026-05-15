@@ -8,3 +8,13 @@ torchvision
 joblib
 openpyxl
 xlrd
+reportlab
+lightgbm
+xgboost
+catboost
+statsmodels
+imbalanced-learn
+optuna
+mlflow
+pytest
+black

@@ -3,14 +3,74 @@ import numpy as np
 import matplotlib.pyplot as plt
 from report_pdf import make_pdf
 from datetime import datetime
-import os
+from pathlib import Path
+from zipfile import BadZipFile
 
 # ===============================
 # 📁 CONFIG
 # ===============================
-INPUT_FILE = "어린이코호트 임상데이터.xlsx"
-OUTPUT_FILE = "어린이코호트_자동분석리포트.xlsx"
+BASE_DIR = Path(__file__).resolve().parent
+OUTPUT_FILE = str(BASE_DIR / "어린이코호트_자동분석리포트.xlsx")
+LOG_FILE = str(BASE_DIR / "analysis_chat_log.xlsx")
 LOG_SHEET = "ChatLog"
+
+
+def _read_workbook_file(path: Path) -> pd.ExcelFile:
+    engine = "xlrd" if path.suffix.lower() == ".xls" else "openpyxl"
+    return pd.ExcelFile(path, engine=engine)
+
+
+def _convert_xls_to_xlsx(xls_path: Path) -> Path:
+    xlsx_path = xls_path.with_suffix(".xlsx")
+
+    if xlsx_path.exists() and xlsx_path.stat().st_mtime >= xls_path.stat().st_mtime:
+        return xlsx_path
+
+    xls_file = pd.ExcelFile(xls_path, engine="xlrd")
+    with pd.ExcelWriter(xlsx_path, engine="openpyxl", mode="w") as writer:
+        for sheet_name in xls_file.sheet_names:
+            df = pd.read_excel(xls_path, sheet_name=sheet_name, engine="xlrd")
+            df.to_excel(writer, sheet_name=sheet_name, index=False)
+
+    return xlsx_path
+
+
+def _prepare_input_file() -> Path:
+    # Prefer existing .xlsx workbooks; otherwise convert the first valid .xls workbook.
+    candidates = [
+        BASE_DIR / "어린이코호트 임상데이터.xlsx",
+        BASE_DIR / "어린이코호트 임상데이터.xls",
+        BASE_DIR / "어린이코호트 임상데이터_수정0518.xlsx",
+        BASE_DIR / "어린이코호트 임상데이터_수정0518.xls",
+    ]
+
+    last_error: Exception | None = None
+    for path in candidates:
+        if not path.exists():
+            continue
+
+        if path.suffix.lower() == ".xlsx":
+            try:
+                _read_workbook_file(path)
+                return path
+            except BadZipFile as exc:
+                last_error = exc
+                continue
+
+        try:
+            return _convert_xls_to_xlsx(path)
+        except Exception as exc:
+            last_error = exc
+
+    found_excel = sorted([p.name for p in BASE_DIR.glob("*.xls*")])
+    raise FileNotFoundError(
+        "No usable input workbook found. Expected one of: "
+        f"{[p.name for p in candidates]}. Found Excel files: {found_excel}. "
+        f"Last error: {last_error}"
+    )
+
+
+INPUT_FILE = _prepare_input_file()
 
 # ==Added Reference Ranges=============================
 # Reference ranges (from your workbook Sheet12 / REF_6_10_M style table)
@@ -79,21 +139,35 @@ def log_chat(message, speaker):
         message
     ]], columns=["Timestamp", "Speaker", "Message"])
 
+    log_path = Path(LOG_FILE)
+
     try:
-        old_log = pd.read_excel(INPUT_FILE, sheet_name=LOG_SHEET, engine='openpyxl')
+        old_log = pd.read_excel(log_path, sheet_name=LOG_SHEET, engine='openpyxl')
         updated_log = pd.concat([old_log, new_entry], ignore_index=True)
-    except:
+    except Exception:
         updated_log = new_entry
 
-    with pd.ExcelWriter(INPUT_FILE, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
-        updated_log.to_excel(writer, sheet_name=LOG_SHEET, index=False)
+    if log_path.exists():
+        with pd.ExcelWriter(log_path, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
+            updated_log.to_excel(writer, sheet_name=LOG_SHEET, index=False)
+    else:
+        with pd.ExcelWriter(log_path, engine='openpyxl', mode='w') as writer:
+            updated_log.to_excel(writer, sheet_name=LOG_SHEET, index=False)
 
 # ===============================
 # ✅ DATA LOAD
 # ===============================
 def load_data():
     log_chat("Load data from Excel", "Copilot")
-    df = pd.read_excel(INPUT_FILE, sheet_name=0, engine='openpyxl')
+
+    try:
+        df = pd.read_excel(INPUT_FILE, sheet_name=0, engine="openpyxl")
+    except BadZipFile as exc:
+        raise ValueError(
+            f"{INPUT_FILE} is not a valid .xlsx workbook. "
+            "The loader should have converted a .xls file first; please check the source workbook."
+        ) from exc
+
     return df
 
 # ===============================
